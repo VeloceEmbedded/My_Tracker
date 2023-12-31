@@ -1,0 +1,13 @@
+# Target labels
+ bootloader
+# Source files and their labels
+D:/My-Project/My_Tracker/Firmware/Code/My_Tracker/build/CMakeFiles/bootloader
+D:/My-Project/My_Tracker/Firmware/Code/My_Tracker/build/CMakeFiles/bootloader.rule
+D:/My-Project/My_Tracker/Firmware/Code/My_Tracker/build/CMakeFiles/bootloader-complete.rule
+D:/My-Project/My_Tracker/Firmware/Code/My_Tracker/build/bootloader-prefix/src/bootloader-stamp/bootloader-build.rule
+D:/My-Project/My_Tracker/Firmware/Code/My_Tracker/build/bootloader-prefix/src/bootloader-stamp/bootloader-configure.rule
+D:/My-Project/My_Tracker/Firmware/Code/My_Tracker/build/bootloader-prefix/src/bootloader-stamp/bootloader-download.rule
+D:/My-Project/My_Tracker/Firmware/Code/My_Tracker/build/bootloader-prefix/src/bootloader-stamp/bootloader-install.rule
+D:/My-Project/My_Tracker/Firmware/Code/My_Tracker/build/bootloader-prefix/src/bootloader-stamp/bootloader-mkdir.rule
+D:/My-Project/My_Tracker/Firmware/Code/My_Tracker/build/bootloader-prefix/src/bootloader-stamp/bootloader-patch.rule
+D:/My-Project/My_Tracker/Firmware/Code/My_Tracker/build/bootloader-prefix/src/bootloader-stamp/bootloader-update.rule
