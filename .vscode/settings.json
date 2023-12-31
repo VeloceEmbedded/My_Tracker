@@ -11,7 +11,7 @@
     "idf.openOcdConfigs": [
         "board/esp32c3-ftdi.cfg"
     ],
-    "idf.portWin": "COM4",
+    "idf.portWin": "COM6",
     "idf.pythonBinPathWin": "c:\\Users\\Akash\\esp\\Tools_Directory\\python_env\\idf5.2_py3.11_env\\Scripts\\python.exe",
     "idf.toolsPathWin": "c:\\Users\\Akash\\esp\\Tools_Directory",
     "C_Cpp.errorSquiggles": "enabled",
@@ -21,5 +21,6 @@
         "projdefs.h": "c",
         "portable.h": "c"
     },
-    "C_Cpp.default.compilerPath": "C:\\Users\\Akash\\esp\\Tools_Directory\\tools\\xtensa-esp-elf\\esp-13.2.0_20230928\\xtensa-esp-elf\\bin\\xtensa-esp32-elf-gcc.exe"
+    "C_Cpp.default.compilerPath": "C:\\Users\\Akash\\esp\\Tools_Directory\\tools\\xtensa-esp-elf\\esp-13.2.0_20230928\\xtensa-esp-elf\\bin\\xtensa-esp32-elf-gcc.exe",
+    "idf.flashType": "UART"
 }

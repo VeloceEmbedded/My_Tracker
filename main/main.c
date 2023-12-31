@@ -1,49 +1,77 @@
 #include <stdio.h>
-#include <inttypes.h>
-#include "sdkconfig.h"
+#include <math.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
-#include "esp_chip_info.h"
-#include "esp_flash.h"
 #include "esp_system.h"
 #include "esp_log.h"
+#include "driver/ledc.h"
+#include "sdkconfig.h"
+#include "esp_timer.h"
 
+// Define the log tag
+static const char *TAG = "Breathing LED";
 
+// LED configuration
+const int ledPin = 2;                                   // GPIO pin
+const ledc_timer_t ledTimer = LEDC_TIMER_0;
+const ledc_channel_t ledChannel = LEDC_CHANNEL_0;
 
-void app_main(void)
-{
-    printf("Hello world!\n");
+// Breathing effect parameters
+const float one_breath = 5.0;                           // Duration of one breath in seconds
+const int smoothness_pts = 100;                         // Number of steps in one breathing cycle
 
-    /* Print chip information */
-    esp_chip_info_t chip_info;
-    uint32_t flash_size;
-    esp_chip_info(&chip_info);
-    printf("This is %s chip with %d CPU core(s), %s%s%s%s, ",
-           CONFIG_IDF_TARGET,
-           chip_info.cores,
-           (chip_info.features & CHIP_FEATURE_WIFI_BGN) ? "WiFi/" : "",
-           (chip_info.features & CHIP_FEATURE_BT) ? "BT" : "",
-           (chip_info.features & CHIP_FEATURE_BLE) ? "BLE" : "",
-           (chip_info.features & CHIP_FEATURE_IEEE802154) ? ", 802.15.4 (Zigbee/Thread)" : "");
+// Gaussian parameters
+const float a = 3.8;                                    // Peak value
+const float offset = 0.4;                               // Offset
+const float b = 18.04;                                  // Center of the peak
+const float c = 2450;                                   // Width of the bell
+const int freq = 1000;                                  // PWM frequency in Hertz
 
-    unsigned major_rev = chip_info.revision / 100;
-    unsigned minor_rev = chip_info.revision % 100;
-    printf("silicon revision v%d.%d, ", major_rev, minor_rev);
-    if(esp_flash_get_size(NULL, &flash_size) != ESP_OK) {
-        printf("Get flash size failed");
-        return;
+void breathing_led_task(void *pvParameters) {
+    // Configure the LED PWM Timer
+    ledc_timer_config_t led_timer = {
+        .duty_resolution = LEDC_TIMER_10_BIT,           // resolution of PWM duty
+        .freq_hz = freq,                                // frequency of PWM signal
+        .speed_mode = LEDC_LOW_SPEED_MODE,              // timer mode
+        .timer_num = ledTimer                           // timer index
+    };
+    ledc_timer_config(&led_timer);
+
+    // Configure the LED PWM Controller
+    ledc_channel_config_t led_channel = {
+        .channel    = ledChannel,
+        .duty       = 0,
+        .gpio_num   = ledPin,
+        .speed_mode = LEDC_LOW_SPEED_MODE,
+        .timer_sel  = ledTimer
+    };
+    ledc_channel_config(&led_channel);
+
+    for(;;) {
+        //uint64_t start_time = esp_timer_get_time();
+        float start_x = b - 4 * c;
+        float end_x = b + 4 * c;
+        float step_x = (end_x - start_x) / smoothness_pts;
+
+        for (int i = 0; i < smoothness_pts; ++i) {
+            float x = start_x + step_x * i;
+            float gauss = exp(-pow(x - b, 2) / (2 * pow(c, 2)));
+            float dutyCycle = offset + a * gauss;
+            int pwm = (int)((dutyCycle / (offset + a)) * 1023.0);
+
+            ledc_set_duty(LEDC_LOW_SPEED_MODE, ledChannel, pwm);
+            ledc_update_duty(LEDC_LOW_SPEED_MODE, ledChannel);
+
+            //ESP_LOGI(TAG, "i: %d, x: %f, gauss: %f, dutyCycle: %f, pwm: %d", i, x, gauss, dutyCycle, pwm);
+
+            vTaskDelay((int)(one_breath / smoothness_pts * 1000) / portTICK_PERIOD_MS);
+        }
+        //uint64_t end_time = esp_timer_get_time();
+        //uint64_t executionTimeMicros_1 = end_time - start_time;
+        //ESP_LOGI(TAG, "Exectution Time: %llu microseconds", executionTimeMicros_1);
     }
+}
 
-    printf("%" PRIu32 "MB %s flash\n", flash_size / (uint32_t)(1024 * 1024),
-           (chip_info.features & CHIP_FEATURE_EMB_FLASH) ? "embedded" : "external");
-
-    printf("Minimum free heap size: %" PRIu32 " bytes\n", esp_get_minimum_free_heap_size());
-
-    for (int i = 10; i >= 0; i--) {
-        printf("Restarting in %d seconds...\n", i);
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
-    }
-    printf("Restarting now.\n");
-    fflush(stdout);
-    esp_restart();
+void app_main() {
+    xTaskCreate(breathing_led_task, "breathing_led_task", 2048, NULL, 1, NULL);
 }
